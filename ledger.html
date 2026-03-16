@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6366F1">
+  <title>KhataLedger - Ledger</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <button class="back-btn" id="btn-back">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <h1 class="top-bar-title" id="customer-name">Customer</h1>
+      <div class="top-bar-actions">
+        <button class="icon-btn" id="btn-profile" title="View Profile">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Ledger Header -->
+    <div class="ledger-header">
+      <div class="ledger-balance-display" id="ledger-balance">₹0.00</div>
+      <div class="ledger-balance-label" id="ledger-balance-label">Settled</div>
+      <div class="ledger-action-row">
+        <button class="ledger-action-btn" id="btn-pdf">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          PDF
+        </button>
+        <button class="ledger-action-btn" id="btn-reminder">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          Reminder
+        </button>
+        <button class="ledger-action-btn" id="btn-sms">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          SMS
+        </button>
+        <button class="ledger-action-btn" id="btn-late-fee"
+          style="background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); color: #FEE2E2;"
+          title="Apply 2% Late Fee">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Late Fee
+        </button>
+      </div>
+    </div>
+
+    <!-- Transaction list -->
+    <div id="txn-list" class="pb-action" style="min-height:200px">
+      <!-- Rendered by JS -->
+    </div>
+
+  </div>
+
+  <!-- Fixed Bottom Buttons -->
+  <div class="action-btn-wrap">
+    <button class="btn-gave" id="btn-gave">
+      ↑ &nbsp; YOU GAVE ₹
+    </button>
+    <button class="btn-got" id="btn-got">
+      ↓ &nbsp; YOU GOT ₹
+    </button>
+  </div>
+
+  <!-- Add Transaction Modal -->
+  <div class="modal-overlay" id="add-txn-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title" id="modal-title">Add Entry</h3>
+
+      <div class="amount-wrap">
+        <span class="amount-prefix" id="currency-prefix">₹</span>
+        <input type="number" id="txn-amount" class="amount-input-large" placeholder="0" min="0" step="0.01"
+          inputmode="decimal">
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="flex:1">
+          <label class="form-label">Note (optional)</label>
+          <input type="text" id="txn-note" class="form-input" placeholder="e.g. Diwali advance, milk bill...">
+        </div>
+
+        <button class="voice-btn" id="photo-btn" title="Attach Photo"
+          style="background:var(--bg-secondary); border-color:var(--border-color); color:var(--text-secondary);">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none">
+
+        <button class="voice-btn" id="voice-btn" title="Voice entry">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="photo-preview-container" style="display:none; position:relative; margin-bottom:16px;">
+        <img id="photo-preview" src=""
+          style="width:80px; height:80px; object-fit:cover; border-radius:12px; border:2px solid var(--border-color);">
+        <button id="remove-photo-btn"
+          style="position:absolute; top:-8px; left:65px; background:var(--red); color:white; border:none; border-radius:50%; width:24px; height:24px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">×</button>
+      </div>
+
+      <div class="voice-result" id="voice-result"></div>
+
+      <div class="mb-4">
+        <label class="form-label">Date</label>
+        <input type="date" id="txn-date" class="form-input">
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label" style="display:flex; justify-content:space-between;">
+          <span>Tag (Vehicle / Project) 🏷️</span>
+          <span id="tag-lock-icon" style="color:var(--orange); font-size:11px; font-weight:700;"></span>
+        </label>
+        <input type="text" id="txn-tag" class="form-input" placeholder="e.g. Truck RJ-14, Kitchen Remodel">
+      </div>
+
+      <button class="btn-primary" id="save-txn">Save Entry</button>
+      <button onclick="document.getElementById('add-txn-modal').classList.remove('show')"
+        style="width:100%;padding:13px;background:transparent;border:none;color:var(--text-muted);font-size:14px;margin-top:8px;cursor:pointer">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Reminder Modal -->
+  <div class="modal-overlay" id="reminder-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">Send Reminder</h3>
+      <div class="reminder-msg" id="reminder-msg-preview" style="font-size:14px;line-height:1.6;margin-bottom:20px">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-google" style="flex:1" id="close-reminder">Cancel</button>
+        <button class="btn-primary" style="flex:1" id="confirm-reminder">Send</button>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/customers.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/voice.js"></script>
+  <script src="assets/js/ledger.js"></script>
+  <script>
+    // Update currency prefix
+    const currency = Settings.get().currency;
+    document.getElementById('currency-prefix').textContent = currency;
+    document.getElementById('btn-gave').textContent = '↑   YOU GAVE ' + currency;
+    document.getElementById('btn-got').textContent = '↓   YOU GOT ' + currency;
+
+    LedgerPage.init();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

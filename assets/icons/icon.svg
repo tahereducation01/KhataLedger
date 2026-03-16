@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="ledgerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="120" fill="url(#ledgerGrad)"/>
+  
+  <rect x="144" y="140" width="240" height="256" rx="24" fill="#3730A3" opacity="0.3"/>
+
+  <rect x="144" y="128" width="224" height="256" rx="24" fill="#FFFFFF"/>
+  
+  <rect x="128" y="128" width="40" height="256" rx="16" fill="#E5E7EB"/>
+
+  <path d="M234 208h54v24h-20.64c-3.15 11.13-10.74 20.2-21.36 24h42v24h-48.8c1.55 3.32 2.8 7.02 2.8 11.2 0 16.5-12.1 28.8-31 28.8H192v-24h13c7.2 0 11-4.8 11-10.4 0-5.8-3.8-10.4-11-10.4h-13v-24h32c6.2 0 11.4-3.1 14.2-8H192v-24h42v-11.2z" fill="#6366F1"/>
+</svg>
