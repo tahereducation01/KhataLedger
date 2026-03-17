@@ -62,8 +62,9 @@ const Customers = (() => {
     const txns = Transactions.getByCustomer(id);
     let balance = 0;
     txns.forEach(t => {
-      if (t.type === 'gave') balance -= t.amount;
-      else balance += t.amount;
+      // FIXED LOGIC: 'gave' increases what they owe us (+), 'got' decreases it (-)
+      if (t.type === 'gave') balance += t.amount;
+      else balance -= t.amount;
     });
     update(id, { balance });
     return balance;

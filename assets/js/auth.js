@@ -60,33 +60,79 @@ const Auth = (() => {
   }
 
   // Signup user
+  // Update existing signup to include role
   function signup(name, email, password, business) {
     const users = getUsers();
     const exists = users.find(u => u.email === email.trim().toLowerCase());
     if (exists) return { success: false, message: 'Email already registered' };
 
     const newUser = {
-      id: 'user_' + Date.now(),
+      id: 'owner_' + Date.now(),
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password: btoa(password),
       business: business || name.trim() + "'s Business",
-      plan: 'basic', // Default to basic
+      plan: 'basic', 
+      role: 'owner', // <-- NEW
       createdAt: new Date().toISOString()
     };
     users.push(newUser);
     saveUsers(users);
 
-    // Save plan to session
     localStorage.setItem(SESSION_KEY, JSON.stringify({
-      id: newUser.id, 
-      name: newUser.name, 
-      email: newUser.email, 
-      business: newUser.business, 
-      plan: newUser.plan
+      id: newUser.id, name: newUser.name, email: newUser.email, 
+      business: newUser.business, plan: newUser.plan, role: newUser.role
     }));
     return { success: true };
   }
+
+  // --- NEW STAFF FUNCTIONS ---
+  function addStaff(name, email, password) {
+    const session = getSession();
+    if (!session || session.plan !== 'advance' || session.role !== 'owner') {
+      return { success: false, message: 'Unauthorized. Advance plan required.' };
+    }
+
+    const users = getUsers();
+    if (users.find(u => u.email === email.trim().toLowerCase())) {
+      return { success: false, message: 'Email already exists' };
+    }
+
+    const newStaff = {
+      id: 'staff_' + Date.now(),
+      ownerId: session.id, // Link to the owner
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password: btoa(password),
+      business: session.business, // Share business name
+      plan: 'advance', // Inherit advance features
+      role: 'staff',
+      createdAt: new Date().toISOString()
+    };
+    
+    users.push(newStaff);
+    saveUsers(users);
+    return { success: true };
+  }
+
+  function getStaff() {
+    const session = getSession();
+    if (!session) return [];
+    return getUsers().filter(u => u.role === 'staff' && u.ownerId === session.id);
+  }
+
+  function removeStaff(staffId) {
+    let users = getUsers();
+    users = users.filter(u => u.id !== staffId);
+    saveUsers(users);
+  }
+
+  // Don't forget to return these new functions at the bottom of auth.js!
+  return { 
+    login, signup, googleSignIn, logout, isLoggedIn, requireAuth, 
+    redirectIfLoggedIn, getCurrentUser, updateBusiness, updatePlan,
+    addStaff, getStaff, removeStaff // <-- ADDED HERE
+  };
 
   // Google sign-in simulation
   function googleSignIn() {

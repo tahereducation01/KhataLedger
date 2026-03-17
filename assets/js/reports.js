@@ -149,8 +149,10 @@ const ReportsPage = (() => {
       }
     } else {
       txns.slice(-12).forEach(t => {
-        if (t.type === 'gave') runningBalance -= t.amount;
-        else runningBalance += t.amount;
+        // FIXED LOGIC:
+        if (t.type === 'gave') runningBalance += t.amount;
+        else runningBalance -= t.amount;
+        
         points.push(runningBalance);
         const d = new Date(t.date);
         labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));

@@ -8,6 +8,7 @@ const LedgerPage = (() => {
   let currentCustomer = null;
   let currentType = 'gave'; // 'gave' or 'got'
   let currentPhotoBase64 = null;
+
   function init() {
     Auth.requireAuth();
     Settings.applyTheme();
@@ -37,6 +38,8 @@ const LedgerPage = (() => {
     const balanceLabelEl = document.getElementById('ledger-balance-label');
 
     balanceEl.textContent = currency + absBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    
+    // FIXED LOGIC: balance > 0 means they owe us (GET), balance < 0 means we owe them (GIVE)
     if (balance > 0) {
       balanceEl.classList.remove('text-red');
       balanceEl.classList.add('text-green');
@@ -66,7 +69,6 @@ const LedgerPage = (() => {
       return;
     }
 
-    // Group by date
     const groups = {};
     txns.forEach(t => {
       const d = t.date;
@@ -82,8 +84,9 @@ const LedgerPage = (() => {
       const label = formatDateLabel(date);
       html += `<div class="txn-date-divider">${label}</div>`;
       groups[date].forEach(t => {
-        if (t.type === 'gave') runningBalance -= t.amount;
-        else runningBalance += t.amount;
+        // FIXED LOGIC for running balance
+        if (t.type === 'gave') runningBalance += t.amount;
+        else runningBalance -= t.amount;
 
         const isGave = t.type === 'gave';
         const amountText = currency + t.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
@@ -112,28 +115,17 @@ const LedgerPage = (() => {
 
     container.innerHTML = html;
 
-    // Robust Long-press to delete logic (fixed for scrolling)
     container.querySelectorAll('.txn-item').forEach(el => {
       let pressTimer;
-
-      const startPress = () => {
-        pressTimer = setTimeout(() => confirmDelete(el.dataset.id), 700);
-      };
-
-      const cancelPress = () => {
-        clearTimeout(pressTimer);
-      };
-
-      // Touch events (passive: true improves scroll performance on mobile)
+      const startPress = () => pressTimer = setTimeout(() => confirmDelete(el.dataset.id), 700);
+      const cancelPress = () => clearTimeout(pressTimer);
       el.addEventListener('touchstart', startPress, { passive: true });
       el.addEventListener('touchend', cancelPress);
-      el.addEventListener('touchmove', cancelPress, { passive: true }); // Cancels if user is scrolling
+      el.addEventListener('touchmove', cancelPress, { passive: true }); 
       el.addEventListener('touchcancel', cancelPress);
-
-      // Desktop Mouse events
       el.addEventListener('mousedown', startPress);
       el.addEventListener('mouseup', cancelPress);
-      el.addEventListener('mouseleave', cancelPress); // Cancels if mouse drags off the item
+      el.addEventListener('mouseleave', cancelPress);
     });
   }
 
@@ -173,7 +165,6 @@ const LedgerPage = (() => {
     modal.classList.add('show');
     setTimeout(() => amountInput.focus(), 200);
 
-    // Paywall check for Tags
     const user = Auth.getCurrentUser();
     const tagInput = document.getElementById('txn-tag');
     const tagLock = document.getElementById('tag-lock-icon');
@@ -221,10 +212,11 @@ const LedgerPage = (() => {
 
   function sendReminder() {
     const balance = currentCustomer.balance || 0;
-    if (balance === 0) { showToast('No pending balance', 'error'); return; }
+    // GUARD: Only send if they owe us
+    if (balance <= 0) { showToast('No pending balance to collect.', 'error'); return; }
+    
     const currency = Settings.get().currency;
-    const absBalance = Math.abs(balance);
-    const msg = `Hello ${currentCustomer.name}, you have a pending amount of ${currency}${absBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Please clear the payment at your earliest convenience. Thank you! - ${Auth.getCurrentUser().business}`;
+    const msg = `Hello ${currentCustomer.name}, you have a pending amount of ${currency}${balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Please clear the payment at your earliest convenience. Thank you! - ${Auth.getCurrentUser().business}`;
     document.getElementById('reminder-msg-preview').textContent = msg;
     document.getElementById('reminder-modal').classList.add('show');
   }
@@ -234,7 +226,7 @@ const LedgerPage = (() => {
     Reminders.add({
       customerId: currentCustomer.id,
       customerName: currentCustomer.name,
-      amount: Math.abs(balance),
+      amount: balance,
       message: document.getElementById('reminder-msg-preview').textContent
     });
     document.getElementById('reminder-modal').classList.remove('show');
@@ -243,91 +235,74 @@ const LedgerPage = (() => {
 
   function generatePDFStatement() {
     const user = Auth.getCurrentUser();
-
-    // 1. Paywall Check
     if (!user.plan || user.plan === 'basic') {
-      if (confirm('📄 PDF Statements is a Pro feature!\n\nUpgrade to KhataLedger Pro for ₹99/mo to generate professional PDF ledgers for your customers.\n\nWould you like to upgrade now?')) {
+      if (confirm('📄 PDF Statements is a Pro feature!\n\nUpgrade to KhataLedger Pro for ₹99/mo to generate professional PDF ledgers.\n\nWould you like to upgrade now?')) {
         window.location.href = 'subscription.html';
       }
       return;
     }
 
     const txns = Transactions.getByCustomer(currentCustomer.id);
-    if (txns.length === 0) {
-      showToast('No transactions to include in statement', 'error');
-      return;
-    }
+    if (txns.length === 0) { showToast('No transactions to include in statement', 'error'); return; }
 
     showToast('Generating PDF Statement...', 'default');
-
-    // 2. Initialize jsPDF
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const currency = Settings.get().currency;
 
-    // 3. Document Header (Business Info)
     doc.setFontSize(22);
-    doc.setTextColor(99, 102, 241); // var(--accent)
+    doc.setTextColor(99, 102, 241);
     doc.text(user.business || 'My Business', 14, 20);
-
     doc.setFontSize(14);
-    doc.setTextColor(17, 24, 39); // text-primary
+    doc.setTextColor(17, 24, 39);
     doc.text('Account Statement', 14, 30);
-
-    // 4. Customer Info
     doc.setFontSize(11);
-    doc.setTextColor(107, 114, 128); // text-secondary
+    doc.setTextColor(107, 114, 128);
     doc.text(`Customer Name: ${currentCustomer.name}`, 14, 40);
-    if (currentCustomer.phone) {
-      doc.text(`Phone Number: ${currentCustomer.phone}`, 14, 46);
-    }
+    if (currentCustomer.phone) doc.text(`Phone Number: ${currentCustomer.phone}`, 14, 46);
     doc.text(`Date Generated: ${new Date().toLocaleDateString('en-IN')}`, 14, 52);
 
-    // 5. Net Balance Summary
     const bal = currentCustomer.balance || 0;
     let balText = 'Settled';
     if (bal > 0) {
       balText = `You will GET: ${currency}${bal.toLocaleString('en-IN')}`;
-      doc.setTextColor(16, 185, 129); // Green
+      doc.setTextColor(16, 185, 129);
     } else if (bal < 0) {
       balText = `You will GIVE: ${currency}${Math.abs(bal).toLocaleString('en-IN')}`;
-      doc.setTextColor(239, 68, 68); // Red
+      doc.setTextColor(239, 68, 68);
     }
     doc.setFontSize(12);
     doc.text(`Net Balance: ${balText}`, 14, 62);
 
-    // 6. Transaction Table Data
     let runningBalance = 0;
     const tableData = txns.map(t => {
-      if (t.type === 'gave') runningBalance -= t.amount;
-      else runningBalance += t.amount;
+      // FIXED LOGIC for PDF
+      if (t.type === 'gave') runningBalance += t.amount;
+      else runningBalance -= t.amount;
 
       const gaveAmt = t.type === 'gave' ? `${currency}${t.amount.toLocaleString('en-IN')}` : '-';
       const gotAmt = t.type === 'got' ? `${currency}${t.amount.toLocaleString('en-IN')}` : '-';
-
       const isPositive = runningBalance >= 0;
       const balStr = `${isPositive ? '' : '-'}${currency}${Math.abs(runningBalance).toLocaleString('en-IN')}`;
 
       return [t.date, t.note || 'Entry', gaveAmt, gotAmt, balStr];
     });
 
-    // 7. Draw Table
     doc.autoTable({
       startY: 70,
       head: [['Date', 'Particulars', 'You Gave', 'You Got', 'Balance']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [99, 102, 241], textColor: 255 }, // Indigo accent header
-      alternateRowStyles: { fillColor: [249, 250, 251] }, // Light gray alternating rows
+      headStyles: { fillColor: [99, 102, 241], textColor: 255 },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
       styles: { fontSize: 10, cellPadding: 4 },
       columnStyles: {
-        2: { halign: 'right', textColor: [239, 68, 68] }, // Red for gave
-        3: { halign: 'right', textColor: [16, 185, 129] }, // Green for got
-        4: { halign: 'right', fontStyle: 'bold' } // Bold balance
+        2: { halign: 'right', textColor: [239, 68, 68] },
+        3: { halign: 'right', textColor: [16, 185, 129] },
+        4: { halign: 'right', fontStyle: 'bold' }
       }
     });
 
-    // 8. Footer
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -336,32 +311,31 @@ const LedgerPage = (() => {
       doc.text(`Generated securely by KhataLedger - Page ${i} of ${pageCount}`, 14, doc.internal.pageSize.height - 10);
     }
 
-    // 9. Save PDF
     doc.save(`KhataLedger_${currentCustomer.name.replace(/\s+/g, '_')}_Statement.pdf`);
     showToast('PDF Statement downloaded successfully!', 'success');
   }
 
   function setupEventListeners() {
-    // Basic Buttons
     document.getElementById('btn-gave')?.addEventListener('click', () => openModal('gave'));
     document.getElementById('btn-got')?.addEventListener('click', () => openModal('got'));
     document.getElementById('save-txn')?.addEventListener('click', saveTransaction);
     document.getElementById('btn-reminder')?.addEventListener('click', sendReminder);
     document.getElementById('close-reminder')?.addEventListener('click', () => document.getElementById('reminder-modal').classList.remove('show'));
     document.getElementById('confirm-reminder')?.addEventListener('click', confirmSendReminder);
-
-    // PDF Button
     document.getElementById('btn-pdf')?.addEventListener('click', generatePDFStatement);
 
-    // SMS Button
+    // SMS Block Update
     document.getElementById('btn-sms')?.addEventListener('click', () => {
+      const bal = currentCustomer.balance || 0;
+      // GUARD: Only send if they owe us
+      if (bal <= 0) {
+        showToast('No pending balance to collect.', 'error');
+        return;
+      }
       if (currentCustomer.phone) {
-        const bal = Math.abs(currentCustomer.balance || 0);
         const currency = Settings.get().currency;
         const msg = `Hi ${currentCustomer.name}, your due is pending ${currency}${bal.toLocaleString('en-IN')}, kindly clear as soon as possible.`;
         const encodedMsg = encodeURIComponent(msg);
-
-        // iOS uses '&body=', Android prefers '?body='
         const separator = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()) ? '&' : '?';
         window.open(`sms:${currentCustomer.phone}${separator}body=${encodedMsg}`, '_blank');
       } else {
@@ -369,21 +343,12 @@ const LedgerPage = (() => {
       }
     });
 
-    // Navigation
     document.getElementById('btn-back')?.addEventListener('click', () => window.location.href = 'customers.html');
-    document.getElementById('btn-profile')?.addEventListener('click', () => {
-      window.location.href = 'customer-profile.html?id=' + currentCustomer.id;
-    });
+    document.getElementById('btn-profile')?.addEventListener('click', () => { window.location.href = 'customer-profile.html?id=' + currentCustomer.id; });
+    
+    document.getElementById('add-txn-modal')?.addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+    document.getElementById('reminder-modal')?.addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
 
-    // Close modal on overlay click
-    document.getElementById('add-txn-modal')?.addEventListener('click', function (e) {
-      if (e.target === this) closeModal();
-    });
-    document.getElementById('reminder-modal')?.addEventListener('click', function (e) {
-      if (e.target === this) this.classList.remove('show');
-    });
-
-    // Voice fill
     document.addEventListener('voiceEntry', (e) => {
       const { amount, type } = e.detail;
       if (amount) {
@@ -392,11 +357,11 @@ const LedgerPage = (() => {
       }
     });
 
-    // --- PHOTO ATTACHMENT LOGIC ---
+    // PHOTO ATTACHMENT
     document.getElementById('photo-btn')?.addEventListener('click', () => {
       const user = Auth.getCurrentUser();
       if (!user.plan || user.plan === 'basic') {
-        if (confirm('📸 Photo Attachments is a Pro feature!\n\nUpgrade to KhataLedger Pro to attach bills, challans, and receipts.\n\nWould you like to upgrade now?')) {
+        if (confirm('📸 Photo Attachments is a Pro feature!\n\nUpgrade to KhataLedger Pro to attach bills.\n\nWould you like to upgrade now?')) {
           window.location.href = 'subscription.html';
         }
         return;
@@ -407,7 +372,6 @@ const LedgerPage = (() => {
     document.getElementById('photo-input')?.addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function (event) {
         const img = new Image();
@@ -417,12 +381,9 @@ const LedgerPage = (() => {
           const scaleSize = MAX_WIDTH / img.width;
           canvas.width = MAX_WIDTH;
           canvas.height = img.height * scaleSize;
-
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
           currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
-
           document.getElementById('photo-preview').src = currentPhotoBase64;
           document.getElementById('photo-preview-container').style.display = 'block';
         };
@@ -437,26 +398,24 @@ const LedgerPage = (() => {
       document.getElementById('photo-input').value = '';
     });
 
-    // --- ADVANCE TIER: AUTO LATE FEE ---
+    // LATE FEE GUARD UPDATE
     document.getElementById('btn-late-fee')?.addEventListener('click', () => {
       const user = Auth.getCurrentUser();
-
       if (user.plan !== 'advance') {
-        if (confirm('⏳ Auto Late Fees is an Advance feature!\n\nUpgrade to KhataLedger Advance for ₹159/mo to automatically calculate and apply 2% interest on overdue balances.\n\nWould you like to upgrade now?')) {
+        if (confirm('⏳ Auto Late Fees is an Advance feature!\n\nUpgrade to KhataLedger Advance for ₹159/mo to automatically apply interest.\n\nWould you like to upgrade now?')) {
           window.location.href = 'subscription.html';
         }
         return;
       }
 
       const bal = currentCustomer.balance || 0;
-
+      // GUARD: Only charge late fee if they owe us money
       if (bal <= 0) {
         showToast('Customer has no pending due balance to penalize.', 'error');
         return;
       }
 
       const feeAmount = parseFloat((bal * 0.02).toFixed(2));
-
       if (confirm(`Apply a 2% late fee (₹${feeAmount}) to the current due balance of ₹${bal}?`)) {
         Transactions.add({
           customerId: currentCustomer.id,
