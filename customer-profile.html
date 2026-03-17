@@ -238,8 +238,15 @@
       });
 
       document.getElementById('btn-whatsapp').addEventListener('click', () => {
+        const bal = customer.balance || 0;
+        
+        // GUARD: Only send WhatsApp if they owe us money
+        if (bal <= 0) {
+          showToast('No pending balance to collect.', 'error');
+          return;
+        }
+
         if (customer.phone) {
-          const bal = Math.abs(customer.balance || 0);
           const currency = Settings.get().currency;
           const msg = `Hi ${customer.name}, your due is pending ${currency}${bal.toLocaleString('en-IN')}, kindly clear as soon as possible.`;
           const encodedMsg = encodeURIComponent(msg);

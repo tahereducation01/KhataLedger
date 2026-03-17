@@ -116,6 +116,37 @@
       </div>
     </div>
 
+    <div class="settings-section" id="staff-management-section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <p class="section-title" style="margin:0;">Staff Logins</p>
+        <button id="btn-add-staff" style="background:none; border:none; color:var(--accent); font-weight:700; font-size:13px; cursor:pointer;">+ Add Staff</button>
+      </div>
+      <div class="settings-card" id="staff-list-container">
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add-staff-modal">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <h3 class="modal-title">Add Staff Member</h3>
+        <p style="text-align:center;color:var(--text-secondary);font-size:13px;margin-top:-10px;margin-bottom:20px;">They will log in with these details to manage your ledger.</p>
+        
+        <div class="mb-3">
+          <label class="form-label">Staff Name</label>
+          <input type="text" id="staff-name" class="form-input" placeholder="e.g. Rahul Manager">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Login Email</label>
+          <input type="email" id="staff-email" class="form-input" placeholder="rahul@mybusiness.com">
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Temporary Password</label>
+          <input type="password" id="staff-password" class="form-input" placeholder="Minimum 6 characters">
+        </div>
+        <button class="btn-primary" id="save-staff-btn">Create Staff Account</button>
+      </div>
+    </div>
+
     <!-- Data Management -->
     <div class="settings-section">
       <p class="section-title">Data</p>
