@@ -15,7 +15,6 @@ const LedgerPage = (() => {
     loadCustomer();
     renderTransactions();
     setupEventListeners();
-    Voice.init();
   }
 
   function loadCustomer() {
@@ -38,7 +37,7 @@ const LedgerPage = (() => {
     const balanceLabelEl = document.getElementById('ledger-balance-label');
 
     balanceEl.textContent = currency + absBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-    
+
     // FIXED LOGIC: balance > 0 means they owe us (GET), balance < 0 means we owe them (GIVE)
     if (balance > 0) {
       balanceEl.classList.remove('text-red');
@@ -52,7 +51,17 @@ const LedgerPage = (() => {
       balanceEl.classList.remove('text-red', 'text-green');
       balanceLabelEl.textContent = 'Settled';
     }
-  }
+    
+    // FEATURE 3: Hide Late Fee button if balance <= 0
+    const lateFeeBtn = document.getElementById('btn-late-fee');
+    if (lateFeeBtn) {
+      if (balance > 0) {
+        lateFeeBtn.style.display = 'flex';
+      } else {
+        lateFeeBtn.style.display = 'none';
+      }
+    }
+  } // <-- THIS WAS THE MISSING BRACKET!
 
   function renderTransactions() {
     const container = document.getElementById('txn-list');
@@ -61,11 +70,11 @@ const LedgerPage = (() => {
 
     if (txns.length === 0) {
       container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">📋</div>
-          <p class="empty-title">No transactions yet</p>
-          <p class="empty-desc">Add your first entry using the buttons below</p>
-        </div>`;
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p class="empty-title">No transactions yet</p>
+        <p class="empty-desc">Add your first entry using the buttons below</p>
+      </div>`;
       return;
     }
 
@@ -84,7 +93,6 @@ const LedgerPage = (() => {
       const label = formatDateLabel(date);
       html += `<div class="txn-date-divider">${label}</div>`;
       groups[date].forEach(t => {
-        // FIXED LOGIC for running balance
         if (t.type === 'gave') runningBalance += t.amount;
         else runningBalance -= t.amount;
 
@@ -93,23 +101,23 @@ const LedgerPage = (() => {
         const balText = (runningBalance >= 0 ? 'You get ' : 'You give ') + currency + Math.abs(runningBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
         html += `
-          <div class="txn-item" data-id="${t.id}">
-            <div class="txn-icon ${isGave ? 'txn-icon-gave' : 'txn-icon-got'}">
-              ${isGave
+        <div class="txn-item" data-id="${t.id}">
+          <div class="txn-icon ${isGave ? 'txn-icon-gave' : 'txn-icon-got'}">
+            ${isGave
             ? `<svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/></svg>`
             : `<svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12l7 7 7-7"/></svg>`}
-            </div>
-            <div class="txn-details">
-              <p class="txn-note">${t.note || (isGave ? 'You gave' : 'You got')}</p>
-              ${t.photo ? `<img src="${t.photo}" style="width:100%; max-width:120px; border-radius:8px; margin-top:6px; border:1px solid var(--border-color); display:block;">` : ''}
-              ${t.tag ? `<div style="font-size:10px; background:var(--bg-secondary); padding:2px 8px; border-radius:6px; color:var(--text-secondary); border:1px solid var(--border-color); margin-top:6px; display:inline-block; font-weight:700;">🏷️ ${t.tag}</div>` : ''}
-              <p class="txn-time" style="margin-top:4px;">${t.time} · ${isGave ? 'You Gave' : 'You Got'}</p>
-            </div>
-            <div class="txn-amount-col">
-              <span class="txn-amount ${isGave ? 'text-red' : 'text-green'}">${isGave ? '-' : '+'}${amountText}</span>
-              <span class="txn-balance">${balText}</span>
-            </div>
-          </div>`;
+          </div>
+          <div class="txn-details">
+            <p class="txn-note">${t.note || (isGave ? 'You gave' : 'You got')}</p>
+            ${t.photo ? `<img src="${t.photo}" style="width:100%; max-width:120px; border-radius:8px; margin-top:6px; border:1px solid var(--border-color); display:block;">` : ''}
+            ${t.tag ? `<div style="font-size:10px; background:var(--bg-secondary); padding:2px 8px; border-radius:6px; color:var(--text-secondary); border:1px solid var(--border-color); margin-top:6px; display:inline-block; font-weight:700;">🏷️ ${t.tag}</div>` : ''}
+            <p class="txn-time" style="margin-top:4px;">${t.time} · ${isGave ? 'You Gave' : 'You Got'}</p>
+          </div>
+          <div class="txn-amount-col">
+            <span class="txn-amount ${isGave ? 'text-red' : 'text-green'}">${isGave ? '-' : '+'}${amountText}</span>
+            <span class="txn-balance">${balText}</span>
+          </div>
+        </div>`;
       });
     });
 
@@ -121,7 +129,7 @@ const LedgerPage = (() => {
       const cancelPress = () => clearTimeout(pressTimer);
       el.addEventListener('touchstart', startPress, { passive: true });
       el.addEventListener('touchend', cancelPress);
-      el.addEventListener('touchmove', cancelPress, { passive: true }); 
+      el.addEventListener('touchmove', cancelPress, { passive: true });
       el.addEventListener('touchcancel', cancelPress);
       el.addEventListener('mousedown', startPress);
       el.addEventListener('mouseup', cancelPress);
@@ -203,18 +211,21 @@ const LedgerPage = (() => {
       photo: currentPhotoBase64,
       tag: document.getElementById('txn-tag').value
     });
+
     currentCustomer = Customers.getById(currentCustomer.id);
     closeModal();
     renderHeader();
     renderTransactions();
-    showToast(currentType === 'gave' ? 'Entry added: You Gave ₹' + amount : 'Entry added: You Got ₹' + amount, 'success');
+    showToast(`Entry added: You ${currentType === 'gave' ? 'Gave' : 'Got'} ₹${amount}`, 'success');
+
+    // FEATURE 2: Trigger Auto SMS
+    window.triggerAutoSMS(currentCustomer, amount, currentType, note);
   }
 
   function sendReminder() {
     const balance = currentCustomer.balance || 0;
-    // GUARD: Only send if they owe us
     if (balance <= 0) { showToast('No pending balance to collect.', 'error'); return; }
-    
+
     const currency = Settings.get().currency;
     const msg = `Hello ${currentCustomer.name}, you have a pending amount of ${currency}${balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}. Please clear the payment at your earliest convenience. Thank you! - ${Auth.getCurrentUser().business}`;
     document.getElementById('reminder-msg-preview').textContent = msg;
@@ -276,7 +287,6 @@ const LedgerPage = (() => {
 
     let runningBalance = 0;
     const tableData = txns.map(t => {
-      // FIXED LOGIC for PDF
       if (t.type === 'gave') runningBalance += t.amount;
       else runningBalance -= t.amount;
 
@@ -324,38 +334,11 @@ const LedgerPage = (() => {
     document.getElementById('confirm-reminder')?.addEventListener('click', confirmSendReminder);
     document.getElementById('btn-pdf')?.addEventListener('click', generatePDFStatement);
 
-    // SMS Block Update
-    document.getElementById('btn-sms')?.addEventListener('click', () => {
-      const bal = currentCustomer.balance || 0;
-      // GUARD: Only send if they owe us
-      if (bal <= 0) {
-        showToast('No pending balance to collect.', 'error');
-        return;
-      }
-      if (currentCustomer.phone) {
-        const currency = Settings.get().currency;
-        const msg = `Hi ${currentCustomer.name}, your due is pending ${currency}${bal.toLocaleString('en-IN')}, kindly clear as soon as possible.`;
-        const encodedMsg = encodeURIComponent(msg);
-        const separator = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()) ? '&' : '?';
-        window.open(`sms:${currentCustomer.phone}${separator}body=${encodedMsg}`, '_blank');
-      } else {
-        showToast('No phone number saved for this customer', 'error');
-      }
-    });
-
     document.getElementById('btn-back')?.addEventListener('click', () => window.location.href = 'customers.html');
     document.getElementById('btn-profile')?.addEventListener('click', () => { window.location.href = 'customer-profile.html?id=' + currentCustomer.id; });
-    
+
     document.getElementById('add-txn-modal')?.addEventListener('click', function (e) { if (e.target === this) closeModal(); });
     document.getElementById('reminder-modal')?.addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
-
-    document.addEventListener('voiceEntry', (e) => {
-      const { amount, type } = e.detail;
-      if (amount) {
-        document.getElementById('txn-amount').value = amount;
-        if (type) currentType = type;
-      }
-    });
 
     // PHOTO ATTACHMENT
     document.getElementById('photo-btn')?.addEventListener('click', () => {
@@ -409,7 +392,6 @@ const LedgerPage = (() => {
       }
 
       const bal = currentCustomer.balance || 0;
-      // GUARD: Only charge late fee if they owe us money
       if (bal <= 0) {
         showToast('Customer has no pending due balance to penalize.', 'error');
         return;
@@ -432,5 +414,21 @@ const LedgerPage = (() => {
       }
     });
   }
+  
+  // Make SMS trigger global so BOTH customers.html and ledger.js can access it easily
+  window.triggerAutoSMS = function (customer, amount, type, note) {
+    if (!customer.phone) return; 
+    
+    const currency = Settings.get().currency;
+    const bizName = Auth.getCurrentUser().business || 'us';
+    const action = type === 'gave' ? 'Given to you' : 'Received from you';
+    
+    const msg = `Transaction Alert: ${currency}${amount} has been ${action}.\nNote: ${note || 'N/A'}\nNet Balance: ${currency}${Math.abs(customer.balance || 0)}\n- ${bizName}`;
+    
+    const encodedMsg = encodeURIComponent(msg);
+    const separator = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()) ? '&' : '?';
+    window.open(`sms:${customer.phone}${separator}body=${encodedMsg}`, '_blank');
+  };
+
   return { init };
 })();

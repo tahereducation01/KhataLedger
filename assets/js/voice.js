@@ -103,57 +103,45 @@ const Voice = (() => {
     const lower = text.toLowerCase();
     let amount = null;
     let type = null;
+    let targetCustomer = null;
 
     // 1. Extract the number
     const numMatch = lower.match(/\d+(\.\d+)?/);
-    if (numMatch) {
-      amount = parseFloat(numMatch[0]);
-    }
+    if (numMatch) amount = parseFloat(numMatch[0]);
 
-    // 2. Determine transaction type (Gave vs Got)
-    if (/दिया|दिये|gave|give|diya|diye/.test(lower)) {
-      type = 'gave';
-    } else if (/लिया|लिये|mila|received|got|liya|liye/.test(lower)) {
-      type = 'got';
-    } else if (/ko/.test(lower)) {
-      type = 'gave';
-    } else if (/se/.test(lower)) {
-      type = 'got';
-    }
+    // 2. Determine transaction type
+    if (/दिया|दिये|gave|give|diya|diye|ko/.test(lower)) type = 'gave';
+    else if (/लिया|लिये|mila|received|got|liya|liye|se/.test(lower)) type = 'got';
 
-    if (amount) {
-      // 3. Extract the clean Note by removing the number and filler Hinglish words
-      // \b ensures we only remove whole words
-      let cleanNote = lower
-        .replace(numMatch[0], '')
-        .replace(/\b(diya|diye|liya|liye|mila|ko|se|rs|rupees|rupee|muje|mujhe|maine|usne|ne|k|ke|liye|for|gave|got|received)\b/gi, '')
-        .trim()
-        .replace(/\s+/g, ' '); // collapse multiple spaces
-
-      // If nothing is left (e.g. they only said "100 rs diye"), provide a fallback note
-      if (cleanNote.length === 0) {
-        cleanNote = type === 'gave' ? 'Given via Voice' : 'Received via Voice';
-      } else {
-        // Capitalize first letter
-        cleanNote = cleanNote.charAt(0).toUpperCase() + cleanNote.slice(1);
+    // 3. Find Customer Name
+    const allCustomers = Customers.getAll();
+    for (const c of allCustomers) {
+      if (lower.includes(c.name.toLowerCase())) {
+        targetCustomer = c;
+        break;
       }
+    }
 
-      // 4. Fill in the UI inputs
-      const amountInput = document.getElementById('txn-amount');
-      if (amountInput) amountInput.value = amount;
+    const resultEl = document.getElementById('voice-result');
 
-      const noteInput = document.getElementById('txn-note');
-      if (noteInput) noteInput.value = cleanNote;
+    if (amount && type && targetCustomer) {
+      // Clean up note
+      let cleanNote = lower.replace(numMatch[0], '').replace(new RegExp(targetCustomer.name, 'ig'), '').trim();
+      cleanNote = cleanNote.replace(/\b(diya|diye|liya|liye|mila|ko|se|rs|rupees|rupee)\b/gi, '').trim() || 'Voice Entry';
 
-      // Dispatch event to ledger.js
-      const event = new CustomEvent('voiceEntry', { detail: { amount, type } });
+      // Dispatch event
+      const event = new CustomEvent('voiceEntry', { detail: { amount, type, note: cleanNote, customer: targetCustomer } });
       document.dispatchEvent(event);
 
-      // 5. Show rich success message below the button
-      const resultEl = document.getElementById('voice-result');
       if (resultEl) {
-        const typeLabel = type === 'gave' ? '🔴 You Gave' : type === 'got' ? '🟢 You Got' : '';
-        resultEl.innerHTML = `✅ Amount: <b>₹${amount}</b><br>📝 Note: <b>${cleanNote}</b><br>${typeLabel}`;
+        const typeLabel = type === 'gave' ? '🔴 You Gave' : '🟢 You Got';
+        resultEl.innerHTML = `✅ <b>${targetCustomer.name}</b><br>Amount: <b>₹${amount}</b><br>📝 ${cleanNote}<br>${typeLabel}`;
+      }
+    } else {
+      if (resultEl) {
+        resultEl.innerHTML = `❌ Couldn't understand. Please say: "<b>Customer Name</b> ko <b>Amount</b> diya"`;
+        resultEl.classList.add('show');
+        setTimeout(() => resultEl.classList.remove('show'), 4000);
       }
     }
   }
