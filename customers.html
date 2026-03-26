@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,236 +10,360 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
 
-<div class="app-container">
+  <div class="app-container">
 
-  <!-- Top Bar -->
-  <div class="top-bar">
-    <div class="business-selector" onclick="showBusinessMenu()">
-      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
-      </svg>
-      <span class="business-name" id="business-name">My Business</span>
-      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-      </svg>
-    </div>
-    <div class="top-bar-actions">
-      <button class="icon-btn" onclick="window.location.href='collection.html'" title="Collections">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-      </button>
-      <button class="icon-btn" onclick="window.location.href='reports.html'" title="Reports">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-        </svg>
-      </button>
-      <button class="icon-btn" onclick="window.location.href='settings.html'" title="Settings">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- Summary Card -->
-  <div class="summary-card row g-0">
-    <div class="summary-item col-4 text-center">
-      <div class="summary-label">You Will Get</div>
-      <div class="summary-amount" id="total-get">₹0.00</div>
-    </div>
-    <div class="summary-divider"></div>
-    <div class="summary-item col-4 text-center">
-      <div class="summary-label">You Will Give</div>
-      <div class="summary-amount" id="total-give">₹0.00</div>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tab-bar d-flex">
-    <button class="tab-btn flex-fill" id="tab-customers" onclick="switchTab('customer')">
-      Customers
-    </button>
-    <button class="tab-btn flex-fill" id="tab-suppliers" onclick="switchTab('supplier')">
-      Suppliers
-    </button>
-  </div>
-
-  <!-- Search -->
-  <div class="search-container">
-    <div class="search-input-wrap">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <input type="text" id="search-input" class="search-input" placeholder="Search by name or phone...">
-    </div>
-  </div>
-
-  <!-- Filter Chips -->
-  <div class="filter-chips d-flex gap-2">
-    <button class="chip flex-shrink-0 active" onclick="setFilter('all', this)">All</button>
-    <button class="chip flex-shrink-0" onclick="setFilter('pending', this)">Pending</button>
-    <button class="chip flex-shrink-0" onclick="setFilter('toget', this)">To Get</button>
-    <button class="chip flex-shrink-0" onclick="setFilter('togive', this)">To Give</button>
-    <button class="chip flex-shrink-0" onclick="setFilter('settled', this)">Settled</button>
-  </div>
-
-  <!-- Contact List -->
-  <div id="contact-list" class="pb-action">
-    <!-- Rendered by JS -->
-  </div>
-
-  <!-- FAB: Add Customer -->
-  <button class="fab" onclick="openAddModal()" title="Add Customer/Supplier">
-    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-    </svg>
-  </button>
-
-</div>
-
-<!-- Add Customer Modal -->
-<div class="modal-overlay" id="add-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <h3 class="modal-title">Add New Contact</h3>
-
-    <!-- Type selector -->
-    <div class="auth-tabs mb-3">
-      <button class="auth-tab active" id="type-customer" onclick="selectContactType('customer')">Customer</button>
-      <button class="auth-tab" id="type-supplier" onclick="selectContactType('supplier')">Supplier</button>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Full Name *</label>
-      <input type="text" id="add-name" class="form-input" placeholder="Enter your name here">
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Phone Number</label>
-      <input type="tel" id="add-phone" class="form-input" placeholder="Enter your phone number with country code">
-    </div>
-    <div class="mb-4">
-      <label class="form-label">Address</label>
-      <input type="text" id="add-address" class="form-input" placeholder="Enter your address">
-    </div>
-    <button class="btn-primary" onclick="saveContact()">Add Contact</button>
-  </div>
-</div>
-
-<!-- Business Menu -->
-<div class="modal-overlay" id="business-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <h3 class="modal-title">Business</h3>
-    <div class="mb-3">
-      <label class="form-label">Business Name</label>
-      <input type="text" id="business-input" class="form-input" placeholder="Your business name">
-    </div>
-    <button class="btn-primary mb-3" onclick="saveBusiness()">Save</button>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn-google" style="flex:1" onclick="window.location.href='settings.html'">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="business-selector" onclick="showBusinessMenu()">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
         </svg>
-        All Settings
+        <span class="business-name" id="business-name">My Business</span>
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+      <div class="top-bar-actions">
+        <button class="icon-btn" onclick="window.location.href='collection.html'" title="Collections">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="window.location.href='reports.html'" title="Reports">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="window.location.href='settings.html'" title="Settings">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="summary-card row g-0">
+      <div class="summary-item col-4 text-center">
+        <div class="summary-label">You Will Get</div>
+        <div class="summary-amount" id="total-get">₹0.00</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item col-4 text-center">
+        <div class="summary-label">You Will Give</div>
+        <div class="summary-amount" id="total-give">₹0.00</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar d-flex">
+      <button class="tab-btn flex-fill" id="tab-customers" onclick="switchTab('customer')">
+        Customers
       </button>
-      <button class="btn-google" style="flex:1;color:var(--red);border-color:var(--red)" onclick="Auth.logout()">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-        </svg>
-        Logout
+      <button class="tab-btn flex-fill" id="tab-suppliers" onclick="switchTab('supplier')">
+        Suppliers
       </button>
     </div>
+
+    <div class="ad-carousel-container" id="supplier-ads-container">
+      <div class="ad-carousel-title">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+        </svg>
+        Wholesale Offers
+      </div>
+      <div class="ad-carousel" id="supplier-ads-list">
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-container">
+      <div class="search-input-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Search by name or phone...">
+      </div>
+    </div>
+
+    <!-- Filter Chips -->
+    <div class="filter-chips d-flex gap-2">
+      <button class="chip flex-shrink-0 active" onclick="setFilter('all', this)">All</button>
+      <button class="chip flex-shrink-0" onclick="setFilter('pending', this)">Pending</button>
+      <button class="chip flex-shrink-0" onclick="setFilter('toget', this)">To Get</button>
+      <button class="chip flex-shrink-0" onclick="setFilter('togive', this)">To Give</button>
+      <button class="chip flex-shrink-0" onclick="setFilter('settled', this)">Settled</button>
+    </div>
+
+    <!-- Contact List -->
+    <div id="contact-list" class="pb-action">
+      <!-- Rendered by JS -->
+    </div>
+    <button class="fab" id="voice-btn" title="Voice Entry" style="bottom: 96px; background: var(--green);">
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+      </svg>
+    </button>
+    <div class="voice-result" id="voice-result"
+      style="position:fixed; bottom: 170px; left: 16px; right: 16px; z-index: 1000; box-shadow: var(--shadow-lg);">
+    </div>
+
+    <!-- FAB: Add Customer -->
+    <button class="fab" onclick="openAddModal()" title="Add Customer/Supplier">
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+    </button>
+
   </div>
-</div>
 
-<script src="assets/js/app.js"></script>
-<script src="assets/js/customers.js"></script>
-<script src="assets/js/auth.js"></script>
-<script>
-  Auth.requireAuth();
-  Settings.applyTheme();
+  <!-- Add Customer Modal -->
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">Add New Contact</h3>
 
-  let currentTab = 'customer';
-  let currentFilter = 'all';
-  let newContactType = 'customer';
+      <!-- Type selector -->
+      <div class="auth-tabs mb-3">
+        <button class="auth-tab active" id="type-customer" onclick="selectContactType('customer')">Customer</button>
+        <button class="auth-tab" id="type-supplier" onclick="selectContactType('supplier')">Supplier</button>
+      </div>
 
-  function init() {
-    const user = Auth.getCurrentUser();
-    const settings = Settings.get();
-    document.getElementById('business-name').textContent = user?.business || settings.businessName || 'My Business';
-    renderList();
-    updateSummary();
-    document.getElementById('search-input').addEventListener('input', renderList);
-  }
+      <div class="mb-3">
+        <label class="form-label">Full Name *</label>
+        <input type="text" id="add-name" class="form-input" placeholder="Enter your name here">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" id="add-phone" class="form-input" placeholder="Enter your phone number with country code">
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Address</label>
+        <input type="text" id="add-address" class="form-input" placeholder="Enter your address">
+      </div>
+      <button class="btn-primary" onclick="saveContact()">Add Contact</button>
+    </div>
+  </div>
 
-  function switchTab(type) {
-    currentTab = type;
-    document.getElementById('tab-customers').classList.toggle('active', type === 'customer');
-    document.getElementById('tab-suppliers').classList.toggle('active', type === 'supplier');
-    renderList();
-  }
+  <!-- Business Menu -->
+  <div class="modal-overlay" id="business-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">Business</h3>
+      <div class="mb-3">
+        <label class="form-label">Business Name</label>
+        <input type="text" id="business-input" class="form-input" placeholder="Your business name">
+      </div>
+      <button class="btn-primary mb-3" onclick="saveBusiness()">Save</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-google" style="flex:1" onclick="window.location.href='settings.html'">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          All Settings
+        </button>
+        <button class="btn-google" style="flex:1;color:var(--red);border-color:var(--red)" onclick="Auth.logout()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
 
-  function setFilter(filter, btn) {
-    currentFilter = filter;
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    renderList();
-  }
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/customers.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/voice.js"></script>
+  <script>
+    // Mock Ad Data (Later, this comes from your database)
+    const DUMMY_ADS = [
+      {
+        id: 'ad_1',
+        supplierName: 'Yusufi Hardware',
+        productName: 'Bulk Smartwatches - 40% Margin',
+        imageUrl: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=150&q=80',
+        phone: '+91 7767952949'
+      },
+      {
+        id: 'ad_2',
+        supplierName: 'A1 Distributors',
+        productName: 'Premium Basmati Rice (50kg Bags)',
+        imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=150&q=80',
+        phone: '919876543211'
+      }
+    ];
 
-  function renderList() {
-    const query = document.getElementById('search-input').value;
-    const currency = Settings.get().currency;
-    let contacts = Customers.search(query, currentTab);
+    function loadSupplierAds() {
+      const user = Auth.getCurrentUser();
+      const adContainer = document.getElementById('supplier-ads-container');
 
-    // Apply filter
-    if (currentFilter === 'pending') contacts = contacts.filter(c => (c.balance || 0) !== 0);
-    else if (currentFilter === 'toget') contacts = contacts.filter(c => (c.balance || 0) > 0);
-    else if (currentFilter === 'togive') contacts = contacts.filter(c => (c.balance || 0) < 0);
-    else if (currentFilter === 'settled') contacts = contacts.filter(c => (c.balance || 0) === 0);
+      // PAYWALL CHECK: Only show to 'basic' (free) users
+      if (user && user.plan !== 'basic') {
+        adContainer.style.display = 'none';
+        return;
+      }
 
-    const container = document.getElementById('contact-list');
+      // Show the container and inject ads
+      adContainer.style.display = 'block';
+      const adList = document.getElementById('supplier-ads-list');
 
-    if (contacts.length === 0) {
-      container.innerHTML = `
+      let html = '';
+      DUMMY_ADS.forEach(ad => {
+        // Pre-fill WhatsApp message
+        const msg = encodeURIComponent(`Hi ${ad.supplierName}, I saw your ad for "${ad.productName}" on KhataLedger. I am interested in buying in bulk.`);
+        const waLink = `https://wa.me/${ad.phone}?text=${msg}`;
+
+        html += `
+        <a href="${waLink}" target="_blank" class="ad-card" onclick="console.log('Ad Clicked:', '${ad.id}')">
+          <div class="ad-image-wrap">
+            <img src="${ad.imageUrl}" alt="${ad.productName}" class="ad-image" loading="lazy">
+          </div>
+          <div class="ad-content">
+            <div>
+              <p class="ad-supplier">${ad.supplierName}</p>
+              <p class="ad-product">${ad.productName}</p>
+            </div>
+            <div class="ad-cta">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Message Supplier
+            </div>
+          </div>
+        </a>
+      `;
+      });
+
+      adList.innerHTML = html;
+    }
+    Auth.requireAuth();
+    Settings.applyTheme();
+
+    let currentTab = 'customer';
+    let currentFilter = 'all';
+    let newContactType = 'customer';
+
+    // Include the auto-SMS helper here as well!
+    window.triggerAutoSMS = function (customer, amount, type, note) {
+      if (!customer.phone) return;
+
+      const currency = Settings.get().currency;
+      const bizName = Auth.getCurrentUser().business || 'us';
+      const action = type === 'gave' ? 'Given to you' : 'Received from you';
+
+      const msg = `Transaction Alert: ${currency}${amount} has been ${action}.\nNote: ${note || 'N/A'}\nNet Balance: ${currency}${Math.abs(customer.balance || 0)}\n- ${bizName}`;
+
+      const encodedMsg = encodeURIComponent(msg);
+      const separator = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()) ? '&' : '?';
+      window.open(`sms:${customer.phone}${separator}body=${encodedMsg}`, '_blank');
+    };
+
+    function init() {
+      const user = Auth.getCurrentUser();
+      const settings = Settings.get();
+      document.getElementById('business-name').textContent = user?.business || settings.businessName || 'My Business';
+      renderList();
+      updateSummary();
+      Voice.init();
+      loadSupplierAds();
+      document.getElementById('search-input').addEventListener('input', renderList);
+    }
+    document.addEventListener('voiceEntry', (e) => {
+      const { amount, type, note, customer } = e.detail;
+      if (customer && amount && type) {
+        Transactions.add({
+          customerId: customer.id,
+          type: type,
+          amount: amount,
+          note: note,
+          date: new Date().toISOString().split('T')[0]
+        });
+        showToast(`Saved ₹${amount} for ${customer.name}`, 'success');
+
+        // Auto SMS logic (Feature 2)
+        triggerAutoSMS(Customers.getById(customer.id), amount, type, note);
+
+        renderList();
+        updateSummary();
+      }
+    });
+
+    function switchTab(type) {
+      currentTab = type;
+      document.getElementById('tab-customers').classList.toggle('active', type === 'customer');
+      document.getElementById('tab-suppliers').classList.toggle('active', type === 'supplier');
+      renderList();
+    }
+
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderList();
+    }
+
+    function renderList() {
+      const query = document.getElementById('search-input').value;
+      const currency = Settings.get().currency;
+      let contacts = Customers.search(query, currentTab);
+
+      // Apply filter
+      if (currentFilter === 'pending') contacts = contacts.filter(c => (c.balance || 0) !== 0);
+      else if (currentFilter === 'toget') contacts = contacts.filter(c => (c.balance || 0) > 0);
+      else if (currentFilter === 'togive') contacts = contacts.filter(c => (c.balance || 0) < 0);
+      else if (currentFilter === 'settled') contacts = contacts.filter(c => (c.balance || 0) === 0);
+
+      const container = document.getElementById('contact-list');
+
+      if (contacts.length === 0) {
+        container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">${currentTab === 'customer' ? '👥' : '🏪'}</div>
           <p class="empty-title">No ${currentTab}s found</p>
           <p class="empty-desc">Tap the + button to add your first ${currentTab}</p>
         </div>`;
-      return;
-    }
+        return;
+      }
 
-    // Sort: pending first, then by name
-    contacts.sort((a, b) => Math.abs(b.balance || 0) - Math.abs(a.balance || 0));
+      // Sort: pending first, then by name
+      contacts.sort((a, b) => Math.abs(b.balance || 0) - Math.abs(a.balance || 0));
 
-    // Group by first letter
-    const groups = {};
-    contacts.forEach(c => {
-      const letter = c.name.charAt(0).toUpperCase();
-      if (!groups[letter]) groups[letter] = [];
-      groups[letter].push(c);
-    });
+      // Group by first letter
+      const groups = {};
+      contacts.forEach(c => {
+        const letter = c.name.charAt(0).toUpperCase();
+        if (!groups[letter]) groups[letter] = [];
+        groups[letter].push(c);
+      });
 
-    let html = '';
-    Object.keys(groups).sort().forEach(letter => {
-      html += `<div class="list-section-label">${letter}</div>`;
-      groups[letter].forEach(c => {
-        const bal = c.balance || 0;
-        const absBal = Math.abs(bal);
-        const balClass = bal > 0 ? 'balance-green' : bal < 0 ? 'balance-red' : 'balance-zero';
-        const balLabel = bal > 0 ? 'will get' : bal < 0 ? 'will give' : 'settled';
-        const balText = bal === 0 ? 'Settled' : currency + absBal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      let html = '';
+      Object.keys(groups).sort().forEach(letter => {
+        html += `<div class="list-section-label">${letter}</div>`;
+        groups[letter].forEach(c => {
+          const bal = c.balance || 0;
+          const absBal = Math.abs(bal);
+          const balClass = bal > 0 ? 'balance-green' : bal < 0 ? 'balance-red' : 'balance-zero';
+          const balLabel = bal > 0 ? 'will get' : bal < 0 ? 'will give' : 'settled';
+          const balText = bal === 0 ? 'Settled' : currency + absBal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
-        // Last transaction time
-        const txns = Transactions.getByCustomer(c.id);
-        const lastTxn = txns.length > 0 ? timeAgo(txns[txns.length - 1].date, txns[txns.length - 1].time) : 'No transactions';
+          // Last transaction time
+          const txns = Transactions.getByCustomer(c.id);
+          const lastTxn = txns.length > 0 ? timeAgo(txns[txns.length - 1].date, txns[txns.length - 1].time) : 'No transactions';
 
-        html += `
+          html += `
           <a class="contact-item d-flex align-items-center" href="ledger.html?id=${c.id}">
             <div class="contact-avatar avatar-${c.avatarColor}">${c.name.charAt(0).toUpperCase()}</div>
             <div class="contact-info">
@@ -250,87 +375,88 @@
               <span class="balance-label ${balClass}">${balLabel}</span>
             </div>
           </a>`;
+        });
+      });
+
+      container.innerHTML = html;
+    }
+
+    function updateSummary() {
+      const all = Customers.getAll();
+      const currency = Settings.get().currency;
+      let totalGet = 0, totalGive = 0;
+      all.forEach(c => {
+        const b = c.balance || 0;
+        if (b > 0) totalGet += b;
+        else if (b < 0) totalGive += Math.abs(b);
+      });
+      document.getElementById('total-get').textContent = currency + totalGet.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      document.getElementById('total-give').textContent = currency + totalGive.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    }
+
+    function openAddModal() {
+      document.getElementById('add-name').value = '';
+      document.getElementById('add-phone').value = '';
+      document.getElementById('add-address').value = '';
+      selectContactType(currentTab);
+      document.getElementById('add-modal').classList.add('show');
+      setTimeout(() => document.getElementById('add-name').focus(), 200);
+    }
+
+    function selectContactType(type) {
+      newContactType = type;
+      document.getElementById('type-customer').classList.toggle('active', type === 'customer');
+      document.getElementById('type-supplier').classList.toggle('active', type === 'supplier');
+    }
+
+    function saveContact() {
+      const name = document.getElementById('add-name').value;
+      if (!name || name.trim().length < 2) { showToast('Please enter a valid name', 'error'); return; }
+      const contact = Customers.add({
+        name,
+        phone: document.getElementById('add-phone').value,
+        address: document.getElementById('add-address').value,
+        type: newContactType
+      });
+      document.getElementById('add-modal').classList.remove('show');
+      renderList();
+      updateSummary();
+      showToast(newContactType === 'customer' ? 'Customer added!' : 'Supplier added!', 'success');
+      // Go to ledger
+      setTimeout(() => window.location.href = 'ledger.html?id=' + contact.id, 500);
+    }
+
+    function showBusinessMenu() {
+      const user = Auth.getCurrentUser();
+      document.getElementById('business-input').value = user?.business || '';
+      document.getElementById('business-modal').classList.add('show');
+    }
+
+    function saveBusiness() {
+      const name = document.getElementById('business-input').value.trim();
+      if (!name) { showToast('Please enter a name', 'error'); return; }
+      Auth.updateBusiness(name);
+      Settings.set({ businessName: name });
+      document.getElementById('business-name').textContent = name;
+      document.getElementById('business-modal').classList.remove('show');
+      showToast('Business name updated!', 'success');
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.addEventListener('click', function (e) {
+        if (e.target === this) this.classList.remove('show');
       });
     });
 
-    container.innerHTML = html;
-  }
-
-  function updateSummary() {
-    const all = Customers.getAll();
-    const currency = Settings.get().currency;
-    let totalGet = 0, totalGive = 0;
-    all.forEach(c => {
-      const b = c.balance || 0;
-      if (b > 0) totalGet += b;
-      else if (b < 0) totalGive += Math.abs(b);
-    });
-    document.getElementById('total-get').textContent = currency + totalGet.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-    document.getElementById('total-give').textContent = currency + totalGive.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-  }
-
-  function openAddModal() {
-    document.getElementById('add-name').value = '';
-    document.getElementById('add-phone').value = '';
-    document.getElementById('add-address').value = '';
-    selectContactType(currentTab);
-    document.getElementById('add-modal').classList.add('show');
-    setTimeout(() => document.getElementById('add-name').focus(), 200);
-  }
-
-  function selectContactType(type) {
-    newContactType = type;
-    document.getElementById('type-customer').classList.toggle('active', type === 'customer');
-    document.getElementById('type-supplier').classList.toggle('active', type === 'supplier');
-  }
-
-  function saveContact() {
-    const name = document.getElementById('add-name').value;
-    if (!name || name.trim().length < 2) { showToast('Please enter a valid name', 'error'); return; }
-    const contact = Customers.add({
-      name,
-      phone: document.getElementById('add-phone').value,
-      address: document.getElementById('add-address').value,
-      type: newContactType
-    });
-    document.getElementById('add-modal').classList.remove('show');
-    renderList();
-    updateSummary();
-    showToast(newContactType === 'customer' ? 'Customer added!' : 'Supplier added!', 'success');
-    // Go to ledger
-    setTimeout(() => window.location.href = 'ledger.html?id=' + contact.id, 500);
-  }
-
-  function showBusinessMenu() {
-    const user = Auth.getCurrentUser();
-    document.getElementById('business-input').value = user?.business || '';
-    document.getElementById('business-modal').classList.add('show');
-  }
-
-  function saveBusiness() {
-    const name = document.getElementById('business-input').value.trim();
-    if (!name) { showToast('Please enter a name', 'error'); return; }
-    Auth.updateBusiness(name);
-    Settings.set({ businessName: name });
-    document.getElementById('business-name').textContent = name;
-    document.getElementById('business-modal').classList.remove('show');
-    showToast('Business name updated!', 'success');
-  }
-
-  // Close modals on overlay click
-  document.querySelectorAll('.modal-overlay').forEach(m => {
-    m.addEventListener('click', function(e) {
-      if (e.target === this) this.classList.remove('show');
-    });
-  });
-
-  init();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {});
-  }
-</script>
+    init();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').catch(() => { });
+    }
+  </script>
 </body>
+
 </html>
