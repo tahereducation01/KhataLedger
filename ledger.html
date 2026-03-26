@@ -64,9 +64,16 @@
     </div>
 
     <!-- Transaction list -->
-    <div id="txn-list" class="pb-action" style="min-height:200px">
-      <!-- Rendered by JS -->
+    <div class="tab-bar d-flex" id="supplier-tabs" style="display: none; margin-top: 12px; margin-bottom: 4px;">
+      <button class="tab-btn flex-fill active" id="tab-ledger" onclick="LedgerPage.switchTab('ledger')">Ledger</button>
+      <button class="tab-btn flex-fill" id="tab-products" onclick="LedgerPage.switchTab('products')">Products</button>
     </div>
+
+    <div id="txn-list" class="pb-action" style="min-height:200px">
+      </div>
+
+    <div id="products-list" class="pb-action" style="display: none; min-height:200px; padding: 12px 16px;">
+      </div>
 
   </div>
 
@@ -150,6 +157,16 @@
         <button class="btn-google" style="flex:1" id="close-reminder">Cancel</button>
         <button class="btn-primary" style="flex:1" id="confirm-reminder">Send</button>
       </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="image-viewer-modal" style="align-items: center; z-index: 2000;">
+    <div style="position: relative; width: 90vw; max-width: 500px; max-height: 90vh;">
+      <button onclick="document.getElementById('image-viewer-modal').classList.remove('show')"
+        style="position: absolute; top: -16px; right: -16px; background: var(--bg-card); color: var(--text-primary); border: 2px solid var(--border-color); border-radius: 50%; width: 36px; height: 36px; font-weight: bold; font-size: 20px; cursor: pointer; box-shadow: var(--shadow-md); display: flex; align-items: center; justify-content: center; z-index: 10; padding: 0;">
+        ×
+      </button>
+      <img id="viewer-image" src="" alt="Enlarged Product"
+        style="width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: var(--shadow-lg); display: block; background: var(--bg-secondary); object-fit: contain;">
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
