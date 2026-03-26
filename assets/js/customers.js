@@ -237,3 +237,39 @@ const Settings = (() => {
 
   return { get, set, applyTheme };
 })();
+/**
+ * Products module - For managing your own catalog
+ */
+const Products = (() => {
+  const KEY = 'ledger_products';
+
+  function getAll() {
+    return JSON.parse(localStorage.getItem(KEY) || '[]');
+  }
+
+  function save(list) {
+    localStorage.setItem(KEY, JSON.stringify(list));
+  }
+
+  function add(data) {
+    const list = getAll();
+    const newProduct = {
+      id: 'prod_' + Date.now(),
+      name: data.name.trim(),
+      category: data.category ? data.category.trim() : 'Uncategorized',
+      price: parseFloat(data.price),
+      img: data.img || null,
+      createdAt: new Date().toISOString()
+    };
+    list.push(newProduct);
+    save(list);
+    return newProduct;
+  }
+
+  function remove(id) {
+    const list = getAll().filter(p => p.id !== id);
+    save(list);
+  }
+
+  return { getAll, add, remove };
+})();

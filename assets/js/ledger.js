@@ -8,6 +8,7 @@ const LedgerPage = (() => {
   let currentCustomer = null;
   let currentType = 'gave'; // 'gave' or 'got'
   let currentPhotoBase64 = null;
+  let currentTab = 'ledger';
 
   function init() {
     Auth.requireAuth();
@@ -38,7 +39,6 @@ const LedgerPage = (() => {
 
     balanceEl.textContent = currency + absBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
-    // FIXED LOGIC: balance > 0 means they owe us (GET), balance < 0 means we owe them (GIVE)
     if (balance > 0) {
       balanceEl.classList.remove('text-red');
       balanceEl.classList.add('text-green');
@@ -51,8 +51,7 @@ const LedgerPage = (() => {
       balanceEl.classList.remove('text-red', 'text-green');
       balanceLabelEl.textContent = 'Settled';
     }
-    
-    // FEATURE 3: Hide Late Fee button if balance <= 0
+
     const lateFeeBtn = document.getElementById('btn-late-fee');
     if (lateFeeBtn) {
       if (balance > 0) {
@@ -61,8 +60,86 @@ const LedgerPage = (() => {
         lateFeeBtn.style.display = 'none';
       }
     }
-  } // <-- THIS WAS THE MISSING BRACKET!
 
+    const supplierTabs = document.getElementById('supplier-tabs');
+    if (supplierTabs) {
+      if (currentCustomer.type === 'supplier') {
+        supplierTabs.style.display = 'flex';
+      } else {
+        supplierTabs.style.display = 'none';
+      }
+    }
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+
+    document.getElementById('tab-ledger').classList.toggle('active', tab === 'ledger');
+    document.getElementById('tab-products').classList.toggle('active', tab === 'products');
+
+    document.getElementById('txn-list').style.display = tab === 'ledger' ? 'block' : 'none';
+    document.getElementById('products-list').style.display = tab === 'products' ? 'block' : 'none';
+
+    const actionWrap = document.querySelector('.action-btn-wrap');
+    if (actionWrap) {
+      actionWrap.style.display = tab === 'ledger' ? 'flex' : 'none';
+    }
+
+    if (tab === 'products') {
+      renderProducts();
+    }
+  }
+
+  function renderProducts() {
+    const container = document.getElementById('products-list');
+
+    // Check if the supplier has a phone number saved
+    if (!currentCustomer.phone) {
+      container.innerHTML = `
+        <div class="empty-state" style="margin-top: 40px;">
+          <div class="empty-icon">📱</div>
+          <p class="empty-title">No Phone Number</p>
+          <p class="empty-desc">Please edit this supplier and add their WhatsApp number to view their catalog.</p>
+        </div>`;
+      return;
+    }
+
+    // Clean the phone number (remove spaces/dashes) for the WhatsApp link
+    const cleanPhone = currentCustomer.phone.replace(/\D/g, '');
+
+    // Generate the universal WhatsApp Catalog link for this specific supplier
+    // (If you want to force your specific link for testing, replace this line with: const catalogLink = 'https://wa.me/p/5791402310938976/917767xxxx'; )
+    const catalogLink = `https://wa.me/c/${cleanPhone}`;
+
+    // Render a beautiful CTA (Call to Action) card
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); margin-top: 16px; box-shadow: var(--shadow);">
+        
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="#25D366" style="margin-bottom: 16px;">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+
+        <h3 style="margin: 0 0 8px; color: var(--text-primary); font-size: 20px;">Live Store Catalog</h3>
+        
+        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.5; margin-bottom: 24px; padding: 0 10px;">
+          <b>${currentCustomer.name}</b> updates their product inventory directly on WhatsApp. Tap below to view their latest items, check prices, and place orders.
+        </p>
+        
+        <a href="${catalogLink}" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: white; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; width: 100%; box-sizing: border-box; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
+          Open WhatsApp Catalog
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+        
+      </div>
+    `;
+  }
+  function openImage(imgSrc) {
+    // Upgrade the dummy image URL to high-res for the lightbox
+    const highResImg = imgSrc.replace('w=150', 'w=800');
+
+    document.getElementById('viewer-image').src = highResImg;
+    document.getElementById('image-viewer-modal').classList.add('show');
+  }
   function renderTransactions() {
     const container = document.getElementById('txn-list');
     const txns = Transactions.getByCustomer(currentCustomer.id);
@@ -218,7 +295,6 @@ const LedgerPage = (() => {
     renderTransactions();
     showToast(`Entry added: You ${currentType === 'gave' ? 'Gave' : 'Got'} ₹${amount}`, 'success');
 
-    // FEATURE 2: Trigger Auto SMS
     window.triggerAutoSMS(currentCustomer, amount, currentType, note);
   }
 
@@ -413,22 +489,22 @@ const LedgerPage = (() => {
         showToast('2% Late fee applied successfully!', 'success');
       }
     });
+    document.getElementById('image-viewer-modal')?.addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
   }
-  
-  // Make SMS trigger global so BOTH customers.html and ledger.js can access it easily
+
   window.triggerAutoSMS = function (customer, amount, type, note) {
-    if (!customer.phone) return; 
-    
+    if (!customer.phone) return;
+
     const currency = Settings.get().currency;
     const bizName = Auth.getCurrentUser().business || 'us';
     const action = type === 'gave' ? 'Given to you' : 'Received from you';
-    
+
     const msg = `Transaction Alert: ${currency}${amount} has been ${action}.\nNote: ${note || 'N/A'}\nNet Balance: ${currency}${Math.abs(customer.balance || 0)}\n- ${bizName}`;
-    
+
     const encodedMsg = encodeURIComponent(msg);
     const separator = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()) ? '&' : '?';
     window.open(`sms:${customer.phone}${separator}body=${encodedMsg}`, '_blank');
   };
 
-  return { init };
+  return { init, switchTab, openImage };
 })();
